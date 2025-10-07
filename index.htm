@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貝兒絲樂園儲值卡退款試算</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8 m-4">
+        
+        <div class="flex justify-end mb-2">
+            <a href="https://line.me/ti/g2/HteCH-rb9k1wAHajC-NlDEqpAtiN0oB_TmqGgA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener noreferrer" class="bg-green-500 text-white text-sm font-bold py-2 px-3 rounded-lg hover:bg-green-600 transition-colors duration-300 inline-flex items-center gap-1.5">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+               <span>加入受害者群組</span>
+           </a>
+       </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-blue-600">貝兒絲樂園儲值卡退款試算</h1>
+            <p class="text-gray-500 mt-2">輸入您的卡片資訊，估算可能的退款金額。</p>
+        </div>
+
+        <!-- 輸入表單 -->
+        <form id="calculator-form" class="space-y-6">
+            <div>
+                <label for="current-balance" class="block text-sm font-medium text-gray-700 mb-1">目前卡片餘額 (必填)</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
+                    <input type="number" id="current-balance" name="current-balance" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="例如: 9402" required>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-medium text-gray-800 border-b pb-2 mb-4">贈品資訊 (非必填)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="bonus-credit" class="block text-sm font-medium text-gray-700 mb-1">贈品儲值金</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
+                            <input type="number" id="bonus-credit" name="bonus-credit" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="voucher-value" class="block text-sm font-medium text-gray-700 mb-1">兌換券/商品價值</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
+                            <input type="number" id="voucher-value" name="voucher-value" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="bonus-days" class="block text-sm font-medium text-gray-700 mb-1">贈送天數</label>
+                        <div class="relative">
+                             <input type="number" id="bonus-days" name="bonus-days" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                             <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">天</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                開始計算
+            </button>
+        </form>
+
+        <!-- 結果顯示區 -->
+        <div id="results-container" class="mt-8 hidden">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">計算結果</h2>
+            <div id="results-content" class="space-y-4">
+                <!-- 結果將會動態插入此處 -->
+            </div>
+             <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r-lg">
+                <p class="font-bold">重要聲明</p>
+                <p class="text-sm">本計算結果為非官方預估，僅基於公開資訊進行模擬試算，供您參考。實際退款金額與方式，仍需以「貝兒絲樂園」官方或其指定清算單位的最終公告為準。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculator-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // --- 價格定義 ---
+            const INITIAL_VALUE = 9800; 
+
+            const CARD_PRICES = {
+                weekday_regular: 258,
+                weekday_xinzhuang: 288,
+                holiday_regular: 398,
+                holiday_xinzhuang: 428,
+                extra_adult: 250,
+                extra_child: 258
+            };
+
+            const NON_CARD_PRICES = {
+                adult: 280,
+                child_regular: 680,
+                child_xinzhuang: 780
+            };
+            
+            const DEDUCTION_REGULAR = {
+                total: NON_CARD_PRICES.adult + NON_CARD_PRICES.child_regular,
+                adult: NON_CARD_PRICES.adult,
+                child: NON_CARD_PRICES.child_regular
+            };
+            const DEDUCTION_XINZHUANG = {
+                total: NON_CARD_PRICES.adult + NON_CARD_PRICES.child_xinzhuang,
+                adult: NON_CARD_PRICES.adult,
+                child: NON_CARD_PRICES.child_xinzhuang
+            };
+
+            // --- 獲取使用者輸入 ---
+            const currentBalance = parseFloat(document.getElementById('current-balance').value);
+            const bonusCredit = parseFloat(document.getElementById('bonus-credit').value) || 0;
+            const voucherValue = parseFloat(document.getElementById('voucher-value').value) || 0;
+            const bonusDays = parseInt(document.getElementById('bonus-days').value) || 0;
+
+            if (isNaN(currentBalance)) {
+                // In a real app, prefer a custom modal over alert().
+                const resultsContainer = document.getElementById('results-container');
+                const resultsContent = document.getElementById('results-content');
+                resultsContent.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md"><p class="font-bold">輸入錯誤</p><p>請輸入有效的目前餘額！</p></div>`;
+                resultsContainer.classList.remove('hidden');
+                return;
+            }
+
+            // --- 計算核心邏輯 ---
+            const effectiveInitialValue = INITIAL_VALUE + bonusCredit;
+            const spentAmount = effectiveInitialValue - currentBalance;
+
+            const resultsContainer = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = ''; 
+
+            if (spentAmount < 0) {
+                resultsContent.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md"><p class="font-bold">輸入錯誤</p><p>您的目前餘額 (${currentBalance.toLocaleString()}) 大於初始金額 (${effectiveInitialValue.toLocaleString()})，請重新確認。</p></div>`;
+                resultsContainer.classList.remove('hidden');
+                return;
+            }
+            
+            if (spentAmount == 0 && bonusDays == 0 && voucherValue == 0) {
+                 resultsContent.innerHTML = `<div class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-md"><p class="font-bold">您尚未使用儲值金</p><p>根據您的輸入，預計退款金額為初始儲值金 ${INITIAL_VALUE.toLocaleString()} 元。</p></div>`;
+                resultsContainer.classList.remove('hidden');
+                return;
+            }
+
+            // --- 生成消費組合與退款預估 ---
+            const scenarios = [
+                { name: '假日 (新莊館)', cardPrice: CARD_PRICES.holiday_xinzhuang, deduction: DEDUCTION_XINZHUANG, childDeductionPrice: NON_CARD_PRICES.child_xinzhuang },
+                { name: '假日 (非新莊館)', cardPrice: CARD_PRICES.holiday_regular, deduction: DEDUCTION_REGULAR, childDeductionPrice: NON_CARD_PRICES.child_regular },
+                { name: '平日 (新莊館)', cardPrice: CARD_PRICES.weekday_xinzhuang, deduction: DEDUCTION_XINZHUANG, childDeductionPrice: NON_CARD_PRICES.child_xinzhuang },
+                { name: '平日 (非新莊館)', cardPrice: CARD_PRICES.weekday_regular, deduction: DEDUCTION_REGULAR, childDeductionPrice: NON_CARD_PRICES.child_regular }
+            ];
+
+            let htmlContent = '';
+            const OTHER_SPENDING_TOLERANCE = 100; // 允許的其他消費容錯值(如餐飲)
+            
+            scenarios.forEach(scenario => {
+                if (spentAmount >= scenario.cardPrice) {
+                    const visits = Math.floor(spentAmount / scenario.cardPrice);
+                    if (visits === 0) return;
+
+                    let remainder = spentAmount - (visits * scenario.cardPrice);
+                    let extraChildren = 0;
+                    let extraAdults = 0;
+
+                    // 貪婪演算法：優先匹配價格較高的額外孩童
+                    if (remainder >= CARD_PRICES.extra_child) {
+                        extraChildren = Math.floor(remainder / CARD_PRICES.extra_child);
+                        remainder -= extraChildren * CARD_PRICES.extra_child;
+                    }
+                    if (remainder >= CARD_PRICES.extra_adult) {
+                        extraAdults = Math.floor(remainder / CARD_PRICES.extra_adult);
+                        remainder -= extraAdults * CARD_PRICES.extra_adult;
+                    }
+
+                    if (remainder < OTHER_SPENDING_TOLERANCE) {
+                        const visitsDeduction = visits * scenario.deduction.total;
+                        const extraChildrenDeduction = extraChildren * scenario.childDeductionPrice;
+                        const extraAdultsDeduction = extraAdults * NON_CARD_PRICES.adult;
+                        // 假設贈送天數比照非新莊館平日價格(1大1小)計算
+                        const bonusDaysDeduction = bonusDays * DEDUCTION_REGULAR.total; 
+                        
+                        const totalDeduction = visitsDeduction + extraChildrenDeduction + extraAdultsDeduction + bonusDaysDeduction + voucherValue;
+                        const estimatedRefund = INITIAL_VALUE - totalDeduction;
+
+                        let comboText = `約 ${visits} 次 ${scenario.name} (1大1小)`;
+                        if (extraChildren > 0) comboText += `，加 ${extraChildren} 位孩童`;
+                        if (extraAdults > 0) comboText += `，加 ${extraAdults} 位大人`;
+                        if (remainder >= 10) comboText += ` (及 ${Math.round(remainder)} 元的其他消費)`;
+
+                        let deductionHtml = `<p>扣除消費 (<span class="text-red-500">非卡友價</span>)：- ${visitsDeduction.toLocaleString()} 元 (${visits}次 x (大人${scenario.deduction.adult}+孩童${scenario.deduction.child})元/次)</p>`;
+                        if (extraChildren > 0) deductionHtml += `<p>扣除額外孩童：- ${extraChildrenDeduction.toLocaleString()} 元 (${extraChildren}位 x ${scenario.childDeductionPrice}元/位)</p>`;
+                        if (extraAdults > 0) deductionHtml += `<p>扣除額外大人：- ${extraAdultsDeduction.toLocaleString()} 元 (${extraAdults}位 x ${NON_CARD_PRICES.adult}元/位)</p>`;
+                        if (bonusDays > 0) deductionHtml += `<p>扣除贈送天數：- ${bonusDaysDeduction.toLocaleString()} 元 (${bonusDays}天 x ${DEDUCTION_REGULAR.total}元/天)</p>`;
+                        if (voucherValue > 0) deductionHtml += `<p>扣除兌換券/商品價值：- ${voucherValue.toLocaleString()} 元</p>`;
+
+                        htmlContent += `
+                        <div class="border rounded-lg p-4 bg-gray-50 shadow-sm">
+                            <p class="font-semibold text-blue-700">消費可能組合：${comboText}</p>
+                            <div class="mt-3 text-sm text-gray-600 space-y-1 pl-4 border-l-2">
+                                <p>初始儲值金：<span class="font-medium">${INITIAL_VALUE.toLocaleString()}</span> 元</p>
+                                ${deductionHtml}
+                            </div>
+                            <hr class="my-3">
+                            <p class="text-lg font-bold text-right">預估退款金額：<span class="text-green-600">${Math.max(0, estimatedRefund).toLocaleString()}</span> 元</p>
+                        </div>
+                        `;
+                    }
+                }
+            });
+
+            if (htmlContent === '' && (bonusDays > 0 || voucherValue > 0 || spentAmount > 0)) {
+                 const bonusDaysDeduction = bonusDays * DEDUCTION_REGULAR.total; 
+                 const estimatedRefund = INITIAL_VALUE - bonusDaysDeduction - voucherValue;
+                 htmlContent += `
+                    <div class="border rounded-lg p-4 bg-gray-50 shadow-sm">
+                        <p class="font-semibold text-blue-700">消費可能組合分析</p>
+                        <div class="mt-3 text-sm text-gray-600 space-y-1 pl-4 border-l-2">
+                            <p>初始儲值金：<span class="font-medium">${INITIAL_VALUE.toLocaleString()}</span> 元</p>
+                            ${spentAmount > 0 ? `<p class="text-gray-500">已消費金額 ${spentAmount.toLocaleString()} 元無法匹配主要入場類型，可能為餐飲或其他消費，此部分無法估算退款，將不予退還。</p>` : ''}
+                            ${bonusDays > 0 ? `<p>扣除贈送天數：- ${bonusDaysDeduction.toLocaleString()} 元 (${bonusDays}天 x ${DEDUCTION_REGULAR.total}元/天)</p>` : ''}
+                            ${voucherValue > 0 ? `<p>扣除兌換券/商品價值：- ${voucherValue.toLocaleString()} 元</p>` : ''}
+                        </div>
+                        <hr class="my-3">
+                        <p class="text-lg font-bold text-right">預估退款金額：<span class="text-green-600">${Math.max(0, estimatedRefund).toLocaleString()}</span> 元</p>
+                    </div>
+                `;
+            } else if (htmlContent === '') {
+                 htmlContent = `<div class="text-center text-gray-500 p-4">無法根據您輸入的金額匹配到常見的消費組合，請確認輸入的餘額是否正確。</div>`;
+            }
+
+            resultsContent.innerHTML = htmlContent;
+            resultsContainer.classList.remove('hidden');
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
+
