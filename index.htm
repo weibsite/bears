@@ -11,75 +11,109 @@
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
+            overflow: hidden; /* 隱藏滾動條，因為背景是固定的 */
+        }
+        .news-clipping {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transition: opacity 2s ease-in-out, transform 2s ease-in-out;
+            width: 320px;
+            opacity: 0;
+            transform-origin: center center;
+            border-radius: 0.25rem;
+            z-index: -1;
+        }
+        .news-clipping h4 {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        .news-clipping p {
+            font-size: 0.875rem;
+            color: #4b5563;
+            line-height: 1.4;
+            max-height: 4.5rem; 
+            overflow: hidden;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8 m-4">
-        
-        <div class="flex justify-end mb-2">
-            <a href="https://line.me/ti/g2/HteCH-rb9k1wAHajC-NlDEqpAtiN0oB_TmqGgA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener noreferrer" class="bg-green-500 text-white text-sm font-bold py-2 px-3 rounded-lg hover:bg-green-600 transition-colors duration-300 inline-flex items-center gap-1.5">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-               <span>加入受害者群組</span>
-           </a>
-       </div>
+<body>
 
-        <div class="text-center mb-8">
-            <h1 class="text-2xl sm:text-3xl font-bold text-blue-600">貝兒絲樂園儲值卡退款試算</h1>
-            <p class="text-gray-500 mt-2">輸入您的卡片資訊，估算可能的退款金額。</p>
-        </div>
+    <div id="background-container" class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden bg-gray-200"></div>
 
-        <!-- 輸入表單 -->
-        <form id="calculator-form" class="space-y-6">
-            <div>
-                <label for="current-balance" class="block text-sm font-medium text-gray-700 mb-1">目前卡片餘額 (必填)</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
-                    <input type="number" id="current-balance" name="current-balance" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="例如: 9402" required>
-                </div>
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-2xl mx-auto bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-6 sm:p-8 m-4">
+            
+            <div class="flex justify-end mb-2">
+                <a href="https://line.me/ti/g2/HteCH-rb9k1wAHajC-NlDEqpAtiN0oB_TmqGgA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener noreferrer" class="bg-green-500 text-white text-sm font-bold py-2 px-3 rounded-lg hover:bg-green-600 transition-colors duration-300 inline-flex items-center gap-1.5">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                   <span>加入受害者群組</span>
+               </a>
+           </div>
+    
+            <div class="text-center mb-8">
+                <h1 class="text-2xl sm:text-3xl font-bold text-blue-600">貝兒絲樂園儲值卡退款試算</h1>
+                <p class="text-gray-500 mt-2">輸入您的卡片資訊，估算可能的退款金額。</p>
             </div>
-
-            <div>
-                <h3 class="text-lg font-medium text-gray-800 border-b pb-2 mb-4">贈品資訊 (非必填)</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label for="bonus-credit" class="block text-sm font-medium text-gray-700 mb-1">贈品儲值金</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
-                            <input type="number" id="bonus-credit" name="bonus-credit" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="voucher-value" class="block text-sm font-medium text-gray-700 mb-1">兌換券/商品價值</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
-                            <input type="number" id="voucher-value" name="voucher-value" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="bonus-days" class="block text-sm font-medium text-gray-700 mb-1">贈送天數</label>
-                        <div class="relative">
-                             <input type="number" id="bonus-days" name="bonus-days" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
-                             <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">天</span>
-                        </div>
+    
+            <!-- 輸入表單 -->
+            <form id="calculator-form" class="space-y-6">
+                <div>
+                    <label for="current-balance" class="block text-sm font-medium text-gray-700 mb-1">目前卡片餘額 (必填)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
+                        <input type="number" id="current-balance" name="current-balance" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="例如: 9402" required>
                     </div>
                 </div>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
-                開始計算
-            </button>
-        </form>
-
-        <!-- 結果顯示區 -->
-        <div id="results-container" class="mt-8 hidden">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">計算結果</h2>
-            <div id="results-content" class="space-y-4">
-                <!-- 結果將會動態插入此處 -->
-            </div>
-             <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r-lg">
-                <p class="font-bold">重要聲明</p>
-                <p class="text-sm">本計算結果為非官方預估，僅基於公開資訊進行模擬試算，供您參考。實際退款金額與方式，仍需以「貝兒絲樂園」官方或其指定清算單位的最終公告為準。</p>
+    
+                <div>
+                    <h3 class="text-lg font-medium text-gray-800 border-b pb-2 mb-4">贈品資訊 (非必填)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label for="bonus-credit" class="block text-sm font-medium text-gray-700 mb-1">贈品儲值金</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
+                                <input type="number" id="bonus-credit" name="bonus-credit" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="voucher-value" class="block text-sm font-medium text-gray-700 mb-1">兌換券/商品價值</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
+                                <input type="number" id="voucher-value" name="voucher-value" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="bonus-days" class="block text-sm font-medium text-gray-700 mb-1">贈送天數</label>
+                            <div class="relative">
+                                 <input type="number" id="bonus-days" name="bonus-days" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                                 <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">天</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                    開始計算
+                </button>
+            </form>
+    
+            <!-- 結果顯示區 -->
+            <div id="results-container" class="mt-8 hidden">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">計算結果</h2>
+                <div id="results-content" class="space-y-4">
+                    <!-- 結果將會動態插入此處 -->
+                </div>
+                 <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r-lg">
+                    <p class="font-bold">重要聲明</p>
+                    <p class="text-sm">本計算結果為非官方預估，僅基於公開資訊進行模擬試算，供您參考。實際退款金額與方式，仍需以「貝兒絲樂園」官方或其指定清算單位的最終公告為準。</p>
+                </div>
             </div>
         </div>
     </div>
@@ -172,7 +206,6 @@
                     let extraChildren = 0;
                     let extraAdults = 0;
 
-                    // 貪婪演算法：優先匹配價格較高的額外孩童
                     if (remainder >= CARD_PRICES.extra_child) {
                         extraChildren = Math.floor(remainder / CARD_PRICES.extra_child);
                         remainder -= extraChildren * CARD_PRICES.extra_child;
@@ -186,7 +219,6 @@
                         const visitsDeduction = visits * scenario.deduction.total;
                         const extraChildrenDeduction = extraChildren * scenario.childDeductionPrice;
                         const extraAdultsDeduction = extraAdults * NON_CARD_PRICES.adult;
-                        // 假設贈送天數比照非新莊館平日價格(1大1小)計算
                         const bonusDaysDeduction = bonusDays * DEDUCTION_REGULAR.total; 
                         
                         const totalDeduction = visitsDeduction + extraChildrenDeduction + extraAdultsDeduction + bonusDaysDeduction + voucherValue;
@@ -242,6 +274,66 @@
             resultsContainer.classList.remove('hidden');
             resultsContainer.scrollIntoView({ behavior: 'smooth' });
         });
+
+        // --- 動態背景 Script ---
+        const backgroundContainer = document.getElementById('background-container');
+        const headlines = [
+            '知名親子樂園「貝兒絲」驚傳倒閉！',
+            '突倒閉！貝兒絲樂園「無法退費」',
+            '貝兒絲樂園無預警倒閉 消費者錯愕',
+            '受害者湧入社群求助 籲團結自保',
+            '儲值卡變廢紙？上千家長怒討退款',
+            '全台10分店 親子樂園「貝兒絲」停止營運',
+            '消保官介入 協助處理退費事宜',
+            '律師：可循法律途徑要求賠償'
+        ];
+        const dummyText = '據報導，知名連鎖親子樂園「貝兒絲」今日無預警宣布全台所有分店停止營運，引發大量持有儲值卡的消費者恐慌。許多家長表示卡片內仍有上千甚至上萬元的餘額，如今求助無門...';
+
+        function createNewsClipping() {
+            if (!backgroundContainer) return;
+            const clipping = document.createElement('div');
+            clipping.className = 'news-clipping';
+
+            const title = document.createElement('h4');
+            title.textContent = headlines[Math.floor(Math.random() * headlines.length)];
+
+            const content = document.createElement('p');
+            content.textContent = dummyText;
+
+            clipping.appendChild(title);
+            clipping.appendChild(content);
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            const randomX = Math.random() * (screenWidth - 320);
+            const randomY = Math.random() * (screenHeight - 150);
+            const randomRot = (Math.random() - 0.5) * 30;
+
+            clipping.style.left = `${randomX}px`;
+            clipping.style.top = `${randomY}px`;
+            clipping.style.transform = `rotate(${randomRot}deg) scale(0.8)`;
+            
+            backgroundContainer.appendChild(clipping);
+
+            setTimeout(() => {
+                clipping.style.opacity = '0.7';
+                clipping.style.transform = `rotate(${randomRot}deg) scale(1)`;
+            }, 100);
+
+            if (backgroundContainer.children.length > 15) {
+                const oldClipping = backgroundContainer.children[0];
+                oldClipping.style.opacity = '0';
+                setTimeout(() => {
+                    if(oldClipping.parentNode) {
+                       oldClipping.parentNode.removeChild(oldClipping);
+                    }
+                }, 2000); 
+            }
+        }
+
+        setInterval(createNewsClipping, 3500);
+        createNewsClipping();
     </script>
 </body>
 </html>
