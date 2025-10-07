@@ -53,6 +53,15 @@
         .animate-shake {
             animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
         }
+        /* Style for number input to allow '?' but prevent arrows */
+        input[type="text"].no-spinner::-webkit-outer-spin-button,
+        input[type="text"].no-spinner::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type="text"].no-spinner {
+          -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -77,10 +86,11 @@
             <!-- 輸入表單 -->
             <form id="calculator-form" class="space-y-6">
                 <div>
-                    <label for="current-balance" class="block text-sm font-medium text-gray-700 mb-1">目前卡片餘額 (必填)</label>
+                    <label for="current-balance" class="block text-sm font-medium text-gray-700 mb-1">目前卡片餘額</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">NT$</span>
-                        <input type="number" id="current-balance" name="current-balance" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#CD507C] focus:border-[#CD507C]" placeholder="例如: 9402" required>
+                        <input type="text" id="current-balance" name="current-balance" class="w-full pl-10 pr-24 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#CD507C] focus:border-[#CD507C] no-spinner" placeholder="例如: 9402" inputmode="numeric" pattern="[0-9?]*">
+                        <button type="button" id="forgot-balance-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm font-medium text-[#CD507C] hover:text-[#b8486f]">忘記了?</button>
                     </div>
                 </div>
     
@@ -118,7 +128,7 @@
     
             <!-- 結果顯示區 -->
             <div id="results-container" class="mt-8 hidden">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 border-b-2 border-[#CD507C] pb-2">計算結果</h2>
+                <h2 id="results-title" class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 border-b-2 border-[#CD507C] pb-2">計算結果</h2>
                 <div id="results-content" class="space-y-4">
                     <!-- 結果將會動態插入此處 -->
                 </div>
@@ -153,6 +163,35 @@
 
 
     <script>
+        // --- 價格定義 ---
+        const INITIAL_VALUE = 9800; 
+
+        const CARD_PRICES = {
+            weekday_regular: 258,
+            weekday_xinzhuang: 288,
+            holiday_regular: 398,
+            holiday_xinzhuang: 428,
+            extra_adult: 250,
+            extra_child: 258
+        };
+
+        const NON_CARD_PRICES = {
+            adult: 280,
+            child_regular: 680,
+            child_xinzhuang: 780
+        };
+        
+        const DEDUCTION_REGULAR = {
+            total: NON_CARD_PRICES.adult + NON_CARD_PRICES.child_regular,
+            adult: NON_CARD_PRICES.adult,
+            child: NON_CARD_PRICES.child_regular
+        };
+        const DEDUCTION_XINZHUANG = {
+            total: NON_CARD_PRICES.adult + NON_CARD_PRICES.child_xinzhuang,
+            adult: NON_CARD_PRICES.adult,
+            child: NON_CARD_PRICES.child_xinzhuang
+        };
+
         // --- Modal & Typing Effect Functions ---
         function typeWriter(elementId, text, speed) {
             const element = document.getElementById(elementId);
@@ -174,57 +213,88 @@
             const resultsContainer = document.getElementById('results-container');
             if (!modal) return;
             
-            resultsContainer.classList.add('hidden'); // Hide normal results
+            // Do not hide results container in estimation mode
+            // resultsContainer.classList.add('hidden'); 
             modal.classList.remove('hidden');
             typeWriter('shock-explanation', explanation, 50); // Start typing
         }
 
-        document.getElementById('calculator-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+        function runEstimationCalculation() {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+            const resultsTitle = document.getElementById('results-title');
+            resultsContent.innerHTML = ''; 
+            resultsTitle.textContent = '忘記餘額？消費可能性估算';
 
-            // --- 價格定義 ---
-            const INITIAL_VALUE = 9800; 
-
-            const CARD_PRICES = {
-                weekday_regular: 258,
-                weekday_xinzhuang: 288,
-                holiday_regular: 398,
-                holiday_xinzhuang: 428,
-                extra_adult: 250,
-                extra_child: 258
-            };
-
-            const NON_CARD_PRICES = {
-                adult: 280,
-                child_regular: 680,
-                child_xinzhuang: 780
-            };
-            
-            const DEDUCTION_REGULAR = {
-                total: NON_CARD_PRICES.adult + NON_CARD_PRICES.child_regular,
-                adult: NON_CARD_PRICES.adult,
-                child: NON_CARD_PRICES.child_regular
-            };
-            const DEDUCTION_XINZHUANG = {
-                total: NON_CARD_PRICES.adult + NON_CARD_PRICES.child_xinzhuang,
-                adult: NON_CARD_PRICES.adult,
-                child: NON_CARD_PRICES.child_xinzhuang
-            };
-
-            // --- 獲取使用者輸入 ---
-            const currentBalance = parseFloat(document.getElementById('current-balance').value);
             const bonusCredit = parseFloat(document.getElementById('bonus-credit').value) || 0;
             const voucherValue = parseFloat(document.getElementById('voucher-value').value) || 0;
             const bonusDays = parseInt(document.getElementById('bonus-days').value) || 0;
 
-            if (isNaN(currentBalance)) {
-                const resultsContainer = document.getElementById('results-container');
-                const resultsContent = document.getElementById('results-content');
-                resultsContent.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md"><p class="font-bold">輸入錯誤</p><p>請輸入有效的目前餘額！</p></div>`;
-                resultsContainer.classList.remove('hidden');
+            let htmlContent = '<p class="font-semibold text-gray-700 mb-4">如果您忘記了確切餘額，以下為不同餘額區間的退款估算，供您參考：</p>';
+            const estimatedBalances = [9000, 8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000];
+            const scenario = { name: '假日 (非新莊館)', cardPrice: CARD_PRICES.holiday_regular, deduction: DEDUCTION_REGULAR };
+            
+            estimatedBalances.forEach(balance => {
+                const effectiveInitialValue = INITIAL_VALUE + bonusCredit;
+                const spentAmount = effectiveInitialValue - balance;
+                if (spentAmount <= 0) return;
+
+                const visits = Math.floor(spentAmount / scenario.cardPrice);
+                if (visits === 0) return;
+
+                const visitsDeduction = visits * scenario.deduction.total;
+                const bonusDaysDeduction = bonusDays * DEDUCTION_REGULAR.total;
+                const totalDeduction = visitsDeduction + bonusDaysDeduction + voucherValue;
+                const estimatedRefund = INITIAL_VALUE - totalDeduction;
+
+                let refundHtml = '';
+                if (estimatedRefund <= 0) {
+                    const explanationText = `以餘額約 ${balance.toLocaleString()} 元估算，您的初始儲值金 ${INITIAL_VALUE.toLocaleString()} 元，在扣除約 ${visits} 次消費（以非卡友價 ${scenario.deduction.total.toLocaleString()} 元/次計算）、${bonusDays > 0 ? `${bonusDays} 天贈送天數、` : ''}${voucherValue > 0 ? `${voucherValue.toLocaleString()} 元商品價值、` : ''}等項目後，已全數抵扣完畢。`.replace(/、$/,'');
+                    refundHtml = `<div class="flex items-center justify-end gap-2">
+                                    <span class="text-red-500 font-bold">$0</span>
+                                    <button type="button" class="show-shock-btn bg-red-500 text-white text-xs font-bold py-1 px-2 rounded hover:bg-red-600" data-explanation='${explanationText}'>怎麼辦?</button>
+                                  </div>`;
+                } else {
+                    refundHtml = `<span class="text-green-600 font-bold">${estimatedRefund.toLocaleString()}</span> 元`;
+                }
+
+                htmlContent += `
+                    <div class="border rounded-lg p-4 bg-gray-50 shadow-sm">
+                        <p class="font-bold">若餘額約 <span class="text-[#CD507C]">${balance.toLocaleString()}</span> 元 (已消費 ${spentAmount.toLocaleString()} 元)</p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            相當於去過 <span class="font-bold text-blue-600">${visits}</span> 次 ${scenario.name} (1大1小)。
+                        </p>
+                        <hr class="my-2">
+                        <p class="text-sm font-bold text-right">預估退款金額：${refundHtml}</p>
+                    </div>`;
+            });
+
+            resultsContent.innerHTML = htmlContent;
+            resultsContainer.classList.remove('hidden');
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        document.getElementById('calculator-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const currentBalanceInput = document.getElementById('current-balance');
+            const isForgotMode = currentBalanceInput.value === '?';
+            const currentBalance = parseFloat(currentBalanceInput.value);
+
+            if (isForgotMode || currentBalanceInput.value === '' || isNaN(currentBalance)) {
+                runEstimationCalculation();
                 return;
             }
 
+            // --- Reset title for normal calculation
+            document.getElementById('results-title').textContent = '計算結果';
+
+            // --- 獲取贈品輸入 ---
+            const bonusCredit = parseFloat(document.getElementById('bonus-credit').value) || 0;
+            const voucherValue = parseFloat(document.getElementById('voucher-value').value) || 0;
+            const bonusDays = parseInt(document.getElementById('bonus-days').value) || 0;
+            
             // --- 計算核心邏輯 ---
             const effectiveInitialValue = INITIAL_VALUE + bonusCredit;
             const spentAmount = effectiveInitialValue - currentBalance;
@@ -298,6 +368,7 @@
 
                             explanationText += "後，已全數抵扣完畢。\n\n由於退款是基於「非卡友原價」計算，因此您的預估退款金額為 0。";
                             
+                            resultsContainer.classList.remove('hidden'); // Show results container before modal
                             showShockModal(explanationText);
                             zeroRefundTriggered = true;
                             return;
@@ -343,6 +414,7 @@
                         explanationText = explanationText.slice(0, -1);
                      }
                      explanationText += "後，已全數抵扣完畢。";
+                     resultsContainer.classList.remove('hidden');
                      showShockModal(explanationText);
                      return;
                  }
@@ -431,8 +503,20 @@
             const mainContent = document.getElementById('main-content-wrapper');
             const isMobile = window.innerWidth <= 768;
 
+            document.getElementById('forgot-balance-btn').addEventListener('click', function() {
+                document.getElementById('current-balance').value = '?';
+            });
+
             document.getElementById('close-shock-modal').addEventListener('click', () => {
                 document.getElementById('shock-modal').classList.add('hidden');
+            });
+
+            // Event delegation for dynamically created "怎麼辦?" buttons
+            document.getElementById('results-content').addEventListener('click', function(event) {
+                if (event.target.classList.contains('show-shock-btn')) {
+                    const explanation = event.target.getAttribute('data-explanation');
+                    showShockModal(explanation);
+                }
             });
 
             if (isMobile) {
