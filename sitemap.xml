@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Gemini -->
+
+<url>
+  <!-- 
+    這是您網站的正確 Sitemap 內容。
+    This is the correct sitemap content for your website.
+    請將此檔案的副檔名從 .htm 改為 .xml 後上傳至您的網站根目錄。
+  -->
+  <loc>https://weibsite.github.io/bears/index.htm</loc>
+  <lastmod>2025-10-07</lastmod>
+  <priority>1.00</priority>
+</url>
+
+</urlset>
