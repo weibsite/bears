@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>貝兒絲樂園退款 儲值卡餘額試算</title>
+    <title>貝兒絲樂園儲值卡退款試算</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,7 +79,7 @@
            </div>
     
             <div class="text-center mb-8">
-                <h1 class="text-2xl sm:text-3xl font-bold text-[#CD507C]">貝兒絲樂園退款餘額試算</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold text-[#CD507C]">貝兒絲樂園儲值卡退款試算</h1>
                 <p class="text-gray-500 mt-2">輸入您的卡片資訊，估算可能的退款金額。</p>
             </div>
     
@@ -450,28 +450,54 @@
 
         // --- 動態背景 Script ---
         const backgroundContainer = document.getElementById('background-container');
-        const headlines = [
-            '知名親子樂園「貝兒絲」驚傳倒閉！',
-            '突倒閉！貝兒絲樂園「無法退費」',
-            '貝兒絲樂園無預警倒閉 消費者錯愕',
-            '受害者湧入社群求助 籲團結自保',
-            '儲值卡變廢紙？上千家長怒討退款',
-            '全台10分店 親子樂園「貝兒絲」停止營運',
-            '消保官介入 協助處理退費事宜',
-            '律師：可循法律途徑要求賠償'
+        const newsContent = [
+            { 
+                headline: '知名親子樂園「貝兒絲」驚傳倒閉！', 
+                text: '據報導，知名連鎖親子樂園「貝兒絲」今日無預警宣布全台所有分店停止營運，引發大量持有儲值卡的消費者恐慌。許多家長表示卡片內仍有上千甚至上萬元的餘額，如今求助無門...'
+            },
+            { 
+                headline: '突倒閉！貝兒絲樂園「無法退費」', 
+                text: '「貝兒絲樂園」官方粉絲專頁湧入大量留言，消費者表示客服電話無法接通，線上退費系統也無法使用。家長們心急如焚，擔憂儲值金將血本無歸，網路社群已出現自救會...'
+            },
+            { 
+                headline: '貝兒絲樂園無預警倒閉 消費者錯愕', 
+                text: '許多家長表示昨日才剛帶孩子前往消費，完全未見任何異狀，今日卻突然收到倒閉消息，感到非常錯愕與憤怒。部分分店門口已貼出「結束營業」公告，但未說明退費細節...'
+            },
+            { 
+                headline: '受害者湧入社群求助 籲團結自保', 
+                text: '事件爆發後，多個社群平台迅速成立「貝兒絲受害者自救會」，成員在短時間內突破數百人。群組內成員分享彼此的受害金額與經歷，並商討後續的法律行動與集體申訴...'
+            },
+            { 
+                headline: '儲值卡變廢紙？上千家長怒討退款', 
+                text: '有家長表示，當初因為有豐厚的儲值優惠才一次投入大筆金額，沒想到如今樂園倒閉，儲值卡恐成廢紙。許多消費者要求公司負責人出面說明，並盡快提出具體的退款方案...'
+            },
+            { 
+                headline: '全台10分店 親子樂園「貝兒絲」停止營運', 
+                text: '「貝兒絲樂園」在全台擁有多家分店，是許多家長的遛小孩首選。此次全面停止營運，不僅影響消費者的權益，也讓許多員工頓時失業，相關勞資問題亦引發關注...'
+            },
+            { 
+                headline: '消保官介入 協助處理退費事宜', 
+                text: '針對「貝兒絲樂園」倒閉事件，各地消保官已陸續接獲大量申訴案件。消保官表示將盡力協助消費者，並已要求業者出面處理，保障消費者的退款權益，呼籲民眾保留相關消費證明...'
+            },
+            { 
+                headline: '律師：可循法律途徑要求賠償', 
+                text: '法律專家指出，消費者可依據消費者保護法，向業者提出申訴。若業者後續進入清算程序，消費者也屬於債權人之一，可依法申報債權。建議受害者團結一致，尋求法律協助...'
+            }
         ];
-        const dummyText = '據報導，知名連鎖親子樂園「貝兒絲」今日無預警宣布全台所有分店停止營運，引發大量持有儲值卡的消費者恐慌。許多家長表示卡片內仍有上千甚至上萬元的餘額，如今求助無門...';
 
         function createNewsClipping() {
             if (!backgroundContainer) return;
             const clipping = document.createElement('div');
             clipping.className = 'news-clipping';
+            
+            // Randomly select a news item
+            const newsItem = newsContent[Math.floor(Math.random() * newsContent.length)];
 
             const title = document.createElement('h4');
-            title.textContent = headlines[Math.floor(Math.random() * headlines.length)];
+            title.textContent = newsItem.headline;
 
             const content = document.createElement('p');
-            content.textContent = dummyText;
+            content.textContent = newsItem.text;
 
             clipping.appendChild(title);
             clipping.appendChild(content);
