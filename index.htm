@@ -44,6 +44,15 @@
         #main-content-wrapper {
             transition: opacity 1.5s ease-in;
         }
+        @keyframes shake {
+          10%, 90% { transform: translate3d(-1px, 0, 0); }
+          20%, 80% { transform: translate3d(2px, 0, 0); }
+          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+          40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .animate-shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
     </style>
 </head>
 <body>
@@ -120,8 +129,56 @@
             </div>
         </div>
     </div>
+    
+    <!-- Shocking Result Modal -->
+    <div id="shock-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative animate-shake">
+            <button id="close-shock-modal" class="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-red-600 mb-4">驚人的計算結果！</h2>
+                <p class="text-5xl font-bold mb-6">預估退款：<span class="text-red-500">$0</span> 元</p>
+                <div class="text-left bg-gray-100 p-4 rounded-lg border min-h-[150px]">
+                    <p class="font-bold mb-2">為什麼會這樣？</p>
+                    <p id="shock-explanation" class="text-gray-700 whitespace-pre-wrap"></p>
+                </div>
+                <div class="mt-6">
+                    <p class="mb-4">您的權益可能已受損！建議您立即加入受害者群組，與大家一起討論並爭取應有的權益！</p>
+                    <a href="https://line.me/ti/g2/HteCH-rb9k1wAHajC-NlDEqpAtiN0oB_TmqGgA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener noreferrer" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-300 inline-block">
+                       點此立即加入群組
+                   </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
+        // --- Modal & Typing Effect Functions ---
+        function typeWriter(elementId, text, speed) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            element.innerHTML = ""; // Clear previous text
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function showShockModal(explanation) {
+            const modal = document.getElementById('shock-modal');
+            const resultsContainer = document.getElementById('results-container');
+            if (!modal) return;
+            
+            resultsContainer.classList.add('hidden'); // Hide normal results
+            modal.classList.remove('hidden');
+            typeWriter('shock-explanation', explanation, 50); // Start typing
+        }
+
         document.getElementById('calculator-form').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -161,7 +218,6 @@
             const bonusDays = parseInt(document.getElementById('bonus-days').value) || 0;
 
             if (isNaN(currentBalance)) {
-                // In a real app, prefer a custom modal over alert().
                 const resultsContainer = document.getElementById('results-container');
                 const resultsContent = document.getElementById('results-content');
                 resultsContent.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md"><p class="font-bold">輸入錯誤</p><p>請輸入有效的目前餘額！</p></div>`;
@@ -198,9 +254,12 @@
             ];
 
             let htmlContent = '';
-            const OTHER_SPENDING_TOLERANCE = 100; // 允許的其他消費容錯值(如餐飲)
-            
+            const OTHER_SPENDING_TOLERANCE = 100;
+            let zeroRefundTriggered = false;
+
             scenarios.forEach(scenario => {
+                if (zeroRefundTriggered) return;
+
                 if (spentAmount >= scenario.cardPrice) {
                     const visits = Math.floor(spentAmount / scenario.cardPrice);
                     if (visits === 0) return;
@@ -227,6 +286,23 @@
                         const totalDeduction = visitsDeduction + extraChildrenDeduction + extraAdultsDeduction + bonusDaysDeduction + voucherValue;
                         const estimatedRefund = INITIAL_VALUE - totalDeduction;
 
+                        if (estimatedRefund <= 0) {
+                            let explanationText = `您的初始儲值金 ${INITIAL_VALUE.toLocaleString()} 元，在扣除`;
+                            if (visits > 0) explanationText += `約 ${visits} 次消費 (以非卡友價 ${scenario.deduction.total.toLocaleString()} 元/次計算)、`;
+                            if (bonusDays > 0) explanationText += `${bonusDays} 天贈送天數、`;
+                            if (voucherValue > 0) explanationText += `${voucherValue.toLocaleString()} 元商品價值、`;
+                            
+                            if (explanationText.endsWith('、')) {
+                                explanationText = explanationText.slice(0, -1);
+                            }
+
+                            explanationText += "後，已全數抵扣完畢。\n\n由於退款是基於「非卡友原價」計算，因此您的預估退款金額為 0。";
+                            
+                            showShockModal(explanationText);
+                            zeroRefundTriggered = true;
+                            return;
+                        }
+
                         let comboText = `約 ${visits} 次 ${scenario.name} (1大1小)`;
                         if (extraChildren > 0) comboText += `，加 ${extraChildren} 位孩童`;
                         if (extraAdults > 0) comboText += `，加 ${extraAdults} 位大人`;
@@ -252,10 +328,25 @@
                     }
                 }
             });
+            
+            if (zeroRefundTriggered) return;
 
             if (htmlContent === '' && (bonusDays > 0 || voucherValue > 0 || spentAmount > 0)) {
                  const bonusDaysDeduction = bonusDays * DEDUCTION_REGULAR.total; 
                  const estimatedRefund = INITIAL_VALUE - bonusDaysDeduction - voucherValue;
+                 
+                 if (estimatedRefund <= 0) {
+                     let explanationText = `您的初始儲值金 ${INITIAL_VALUE.toLocaleString()} 元，在扣除`;
+                     if (bonusDays > 0) explanationText += `${bonusDays} 天贈送天數、`;
+                     if (voucherValue > 0) explanationText += `${voucherValue.toLocaleString()} 元商品價值、`;
+                     if (explanationText.endsWith('、')) {
+                        explanationText = explanationText.slice(0, -1);
+                     }
+                     explanationText += "後，已全數抵扣完畢。";
+                     showShockModal(explanationText);
+                     return;
+                 }
+
                  htmlContent += `
                     <div class="border rounded-lg p-4 bg-gray-50 shadow-sm">
                         <p class="font-semibold text-blue-700">消費可能組合分析</p>
@@ -340,22 +431,24 @@
             const mainContent = document.getElementById('main-content-wrapper');
             const isMobile = window.innerWidth <= 768;
 
+            document.getElementById('close-shock-modal').addEventListener('click', () => {
+                document.getElementById('shock-modal').classList.add('hidden');
+            });
+
             if (isMobile) {
                 // Hide form for intro animation on mobile
                 mainContent.style.opacity = '0';
 
                 let fastClipInterval;
-                const animationDuration = 4000; // 4 seconds total intro
-                const fastIntervalTime = 800;   // a new clip every 0.8s
+                const animationDuration = 4000;
+                const fastIntervalTime = 800;
 
-                // Start fast animation
                 fastClipInterval = setInterval(createNewsClipping, fastIntervalTime);
 
-                // After the intro duration, stop the fast animation, start the normal one, and show the form
                 setTimeout(() => {
                     clearInterval(fastClipInterval);
-                    setInterval(createNewsClipping, 3500); // Resume normal speed
-                    mainContent.style.opacity = '1';       // Fade in form
+                    setInterval(createNewsClipping, 3500);
+                    mainContent.style.opacity = '1';
                 }, animationDuration);
 
             } else {
