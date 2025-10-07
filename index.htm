@@ -41,6 +41,9 @@
             max-height: 4.9rem; /* Adjusted to prevent text clipping mid-line */
             overflow: hidden;
         }
+        #main-content-wrapper {
+            transition: opacity 1.5s ease-in;
+        }
     </style>
 </head>
 <body>
@@ -48,7 +51,7 @@
     <div id="background-container" class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden bg-gray-200"></div>
 
     <div class="flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-2xl mx-auto bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-6 sm:p-8 m-4">
+        <div id="main-content-wrapper" class="w-full max-w-2xl mx-auto bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-6 sm:p-8 m-4">
             
             <div class="flex justify-end mb-2">
                 <a href="https://line.me/ti/g2/HteCH-rb9k1wAHajC-NlDEqpAtiN0oB_TmqGgA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener noreferrer" class="bg-green-500 text-white text-sm font-bold py-2 px-3 rounded-lg hover:bg-green-600 transition-colors duration-300 inline-flex items-center gap-1.5">
@@ -332,8 +335,36 @@
             }
         }
 
-        setInterval(createNewsClipping, 3500);
-        createNewsClipping();
+        // --- Initialization Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.getElementById('main-content-wrapper');
+            const isMobile = window.innerWidth <= 768;
+
+            if (isMobile) {
+                // Hide form for intro animation on mobile
+                mainContent.style.opacity = '0';
+
+                let fastClipInterval;
+                const animationDuration = 4000; // 4 seconds total intro
+                const fastIntervalTime = 800;   // a new clip every 0.8s
+
+                // Start fast animation
+                fastClipInterval = setInterval(createNewsClipping, fastIntervalTime);
+
+                // After the intro duration, stop the fast animation, start the normal one, and show the form
+                setTimeout(() => {
+                    clearInterval(fastClipInterval);
+                    setInterval(createNewsClipping, 3500); // Resume normal speed
+                    mainContent.style.opacity = '1';       // Fade in form
+                }, animationDuration);
+
+            } else {
+                // Desktop version - show everything immediately
+                mainContent.style.opacity = '1';
+                setInterval(createNewsClipping, 3500);
+                createNewsClipping();
+            }
+        });
     </script>
 </body>
 </html>
